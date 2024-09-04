@@ -18,30 +18,32 @@ haar_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + alg)
 cam = cv2.VideoCapture(0)
 
 count = 1
-while count <= 1000:
-    print(f"Capturing image {count}")
+while count <= 20:
+    print(f"Capturing image {count}")  # Fixed f-string usage
     ret, img = cam.read()
     
     if not ret:
         print("Failed to capture image.")
         break
-    
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    faces = haar_cascade.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=4)
-    
+
+    gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    faces = haar_cascade.detectMultiScale(gray_img, 1.3, 4)
+
     for (x, y, w, h) in faces:
-        face_img = gray[y:y + h, x:x + w]
-        resized = cv2.resize(face_img, (width, height))
-        
-        # Save the captured image
-        cv2.imwrite(f"{path}/image_{count}.jpg", resized)
+        cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
+        face_only = gray_img[y:y+h, x:x+w]
+        resize_img = cv2.resize(face_only, (width, height))
+        cv2.imwrite(f"{path}/{name}_{count}.jpg", resize_img)  # Fixed file naming
+
         count += 1
-    
-    cv2.imshow("Face", img)
-    
-    # Exit if 'q' is pressed
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+
+    cv2.imshow("Face Detection", img)
+
+    # Press 'ESC' to break out of the loop early
+    key = cv2.waitKey(10)
+    if key == 27:
         break
 
+print("Image Capture Complete")
 cam.release()
 cv2.destroyAllWindows()
